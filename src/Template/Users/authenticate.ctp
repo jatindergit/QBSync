@@ -11,7 +11,7 @@
     // end runnable specific code snipit ##########################//
     intuit.ipp.anywhere.setup({
         menuProxy: '',
-        grantUrl: 'http://' + parser.hostname + '/QBSync/users/home?start=t'
+        grantUrl: 'https://' + parser.hostname + '/QBSync/users/home?start=t'
                 // outside runnable you can point directly to the oauth.php page
     });
 </script>
@@ -20,7 +20,7 @@
   <?php
 
 
-if(!isset($_SESSION['token'])){ ?>
+if(!$this->request->session()->read('token')) { ?>
 <h3>You are not currently authenticated!</h3>
 
 
@@ -32,7 +32,7 @@ if(!isset($_SESSION['token'])){ ?>
  <?php } else { ?>
 <h3>You are currently authenticated!</h3>
 <?php 
-$token = unserialize($_SESSION['token']);
+$token = unserialize($this->request->session()->read('token'));
 //echo "realm ID: ". $_SESSION['realmId'] . "<br />";
 //echo "oauth token: ". $token['oauth_token'] . "<br />";
 //echo "oauth secret: ". $token['oauth_token_secret'] . "<br />";

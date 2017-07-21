@@ -1,4 +1,5 @@
 <?php
+
 /**
  * CakePHP(tm) : Rapid Development Framework (http://cakephp.org)
  * Copyright (c) Cake Software Foundation, Inc. (http://cakefoundation.org)
@@ -12,54 +13,43 @@
  * @since         0.10.0
  * @license       http://www.opensource.org/licenses/mit-license.php MIT License
  */
-
-$cakeDescription = 'CakePHP: the rapid development php framework';
 ?>
 <!DOCTYPE html>
 <html>
     <head>
     <?= $this->Html->charset() ?>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>
-        <?= $cakeDescription ?>:
-        <?= $this->fetch('title') ?>
-        </title>
-    <?= $this->Html->meta('icon') ?>
+        <meta name="viewport" content="width=device-width, maximum-scale=1, initial-scale=1, user-scalable=0" />
+        <title><?= $this->fetch('title') ?> - QBSync</title>
 
-    <?= $this->Html->css('base.css') ?>
-    <?= $this->Html->css('cake.css') ?>
+
+        <!-- WEB FONTS -->
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700,800&amp;subset=latin,latin-ext,cyrillic,cyrillic-ext" rel="stylesheet" type="text/css" />
+
+        <?= $this->Html->meta('icon') ?>
+
+        <!-- CORE CSS -->
+        <link href="<?= SITE_URL ?>/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+
+        <!-- TEMPLATE CSS -->
+        <?= $this->Html->css(['essentials','layout']) ?>
+
+        <?php $this->Html->css('base.css') ?>
+        <?php $this->Html->css('cake.css') ?>
 
     <?= $this->fetch('meta') ?>
     <?= $this->fetch('css') ?>
     <?= $this->fetch('script') ?>
     </head>
     <body>
-        <nav class="top-bar expanded" data-topbar role="navigation">
-            <ul class="title-area large-3 medium-4 columns">
-                <li class="name">
-                    <h1><a href=""><?= $this->fetch('title') ?></a></h1>
-                </li>
-            </ul>
-            <div class="top-bar-section">
-                <ul class="right">
-                    <?php if($this->request->session()->read('realmId')){?>
-                    <li>
-                        
-                        <?= $this->Html->link('Logout', ['controller' => 'Users', 'action' => 'logout'])?>
-                    </li>
-                    <?php }else{ ?>
-                    <li>
-                        <?= $this->Html->link('Customers', ['controller' => 'Customers', 'action' => 'index'])?>
-                    </li>
-                    <?php } ?>
-                </ul>
-            </div>
-        </nav>
-    <?= $this->Flash->render() ?>
-        <div class="container clearfix">
+        <div class="padding-15">
         <?= $this->fetch('content') ?>
         </div>
-        <footer>
-        </footer>
+        <!-- JAVASCRIPT FILES -->
+        <script type="text/javascript">var plugin_path = 'assets/plugins/';</script>
+        <script type="text/javascript" src="assets/plugins/jquery/jquery-2.1.4.min.js"></script>
+        <script type="text/javascript" src="assets/js/app.js"></script>
+                <?= $this->Html->link('End User License Agreement', ['controller' => 'Pages', 'action' => 'endUserLicenseAgreement'])?>
+        <br>
+            <?= $this->Html->link('Terms of Services', ['controller' => 'Pages', 'action' => 'termsOfServices'])?>            
     </body>
 </html>

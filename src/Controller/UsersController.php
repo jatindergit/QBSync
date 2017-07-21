@@ -33,8 +33,14 @@ use QuickBooksOnline\API\DataService\DataService;
  */
 class UsersController extends AppController {
 
+    public function initialize() {
+        parent::initialize();
+        //$this->loadComponent('Schema');
+        $this->Auth->allow(['register', 'logout', 'authenticate', 'home', 'index']);
+    }
+
     public function authenticate() {
-        //$this->viewBuilder()->setLayout('blank');
+        $this->viewBuilder()->setLayout('default');
     }
 
     public function home() {
@@ -42,11 +48,11 @@ class UsersController extends AppController {
 
 
         // The url to this page. it needs to be dynamic to handle runnable's dynamic urls
-        define('CALLBACK_URL', 'http://' . $_SERVER['HTTP_HOST'] . '/QBSync/users/home');
+        define('CALLBACK_URL', 'https://' . $_SERVER['HTTP_HOST'] . '/QBSync/users/home');
         // cleans out the token variable if comming from
         // connect to QuickBooks button
         if (isset($_GET['start'])) {
-            unset($_SESSION['token']);
+            $this->request->session()->delete('token');
         }
 
         try {
@@ -59,12 +65,16 @@ class UsersController extends AppController {
                 // step 1: get request token from Intuit
 
                 $request_token = $oauth->getRequestToken(OAUTH_REQUEST_URL, CALLBACK_URL);
-                var_dump($request_token);
+                //var_dump($request_token);
                 //echo OAUTH_AUTHORISE_URL .'?oauth_token='.$request_token['oauth_token'];die;
                 //$_SESSION['secret'] = $request_token['oauth_token_secret'];
-                $this->request->session()->write('secret',$request_token['oauth_token_secret']);
+                $this->request->session()->write('secret', $request_token['oauth_token_secret']);
                 // step 2: send user to intuit to authorize 
-                $this->redirect(OAUTH_AUTHORISE_URL . '?oauth_token=' . $request_token['oauth_token']);
+                // echo OAUTH_AUTHORISE_URL . '?oauth_token=' . $request_token['oauth_token'];die;
+                header("Location: " . OAUTH_AUTHORISE_URL . '?oauth_token=' . $request_token['oauth_token']);
+                //return $this->redirect('https://www.google.co.in');
+                //return $this->redirect(OAUTH_AUTHORISE_URL . '?oauth_token=' . $request_token['oauth_token']);
+                exit;
             }
 
             if (isset($_GET['oauth_token']) && isset($_GET['oauth_verifier'])) {
@@ -72,9 +82,9 @@ class UsersController extends AppController {
                 $oauth->setToken($_GET['oauth_token'], $this->request->session()->read('secret'));
                 $access_token = $oauth->getAccessToken(OAUTH_ACCESS_URL);
 
-                $this->request->session()->write('token',serialize($access_token));
-                $this->request->session()->write('realmId',$_REQUEST['realmId']);  // realmId is legacy for customerId
-                $this->request->session()->write('dataSource',$_REQUEST['dataSource']);
+                $this->request->session()->write('token', serialize($access_token));
+                $this->request->session()->write('realmId', $_REQUEST['realmId']);  // realmId is legacy for customerId
+                $this->request->session()->write('dataSource', $_REQUEST['dataSource']);
 
                 $token = $this->request->session()->read('token');
                 $realmId = $this->request->session()->read('realmId');
@@ -129,14 +139,52 @@ class UsersController extends AppController {
             echo "The Intuit Helper message is: IntuitErrorType:{" . $error->getIntuitErrorType() . "} IntuitErrorCode:{" . $error->getIntuitErrorCode() . "} IntuitErrorMessage:{" . $error->getIntuitErrorMessage() . "} IntuitErrorDetail:{" . $error->getIntuitErrorDetail() . "}";
         }
     }
-    
-    public function logout(){
+
+    public function logout() {
+        //return $this->redirect(['action' => 'index']);
         $this->request->session()->destroy();
         $this->request->session()->delete('secret');
         $this->request->session()->delete('token');
         $this->request->session()->delete('realmId');
         $this->request->session()->delete('dataSource');
-        return $this->redirect(['action' => 'authenticate']);
+        $this->Auth->logout();
+        return $this->redirect(['action' => 'index']);
+        //return $this->redirect($this->Auth->logout());
+    }
+
+    public function register() {
+
+        $user = $this->Users->newEntity();
+        if ($this->request->is('post')) {
+
+            $user = $this->Users->patchEntity($user, $this->request->getData());
+            if ($this->Users->save($user)) {
+                $this->Flash->success(__('The configuration has been saved.'));
+
+                return $this->redirect(['action' => 'index']);
+            }
+            pr($user->errors());
+            $this->Flash->error(__('The user could not be saved. Please, try again.'));
+        }
+        $this->set(compact('user'));
+    }
+
+    public function login() {
+        $this->viewBuilder()->setLayout('blank');
+        if ($this->request->is('post')) {
+            $user = $this->Auth->identify();
+            //pr($user);die;
+            if ($user) {
+                $this->Auth->setUser($user);
+                return $this->redirect(['action' => 'authenticate']);
+                //return $this->redirect($this->Auth->redirectUrl());
+            }
+            $this->Flash->error(__('Invalid username or password, try again'));
+        }
+    }
+
+    public function index() {
+        
     }
 
 }
